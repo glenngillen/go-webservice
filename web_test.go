@@ -12,7 +12,7 @@ func init() {
 }
 
 func TestHandleGetReturnsPage(t *testing.T) {
-  b := "{\"title\":\"foo\",\"body\":\"Example body\"}"
+  b := `{"title":"foo","body":"Example body"}`
   request, _ := http.NewRequest("GET", "/pages/foo", nil)
   response := httptest.NewRecorder()
 
