@@ -1,36 +1,12 @@
-package main
+package api
 
 // Import formatting and IO libraries
 import (
-        "encoding/json"
+	"encoding/json"
 	"io/ioutil"
 	"net/http"
-        "regexp"
+	"regexp"
 )
-
-// Define a structure to hold our page
-type Page struct {
-	Title string `json:"title"`
-	Body  []byte `json:"body,omitempty"`
-}
-
-type PageJSON struct {
-        Title string `json:"title"`
-        Body  string  `json:"body,omitempty"`
-}
-
-func (p *Page) MarshalJSON() ([]byte, error) {
-  pj := &PageJSON{Title: p.Title, Body: string(p.Body[:])}
-  data, error := json.Marshal(pj)
-  return data, error
-}
-
-// Add a save method to our Page struct so we can persist our data
-// This method's signature reads: "This is a method named save that takes as its receiver p, a pointer to Page . It takes no parameters, and returns a value of type error."
-func (p *Page) save() error {
-	filename := p.Title + ".txt"
-	return ioutil.WriteFile(filename, p.Body, 0600)
-}
 
 // Load pages too
 func loadPage(title string) (*Page, error) {
@@ -45,22 +21,22 @@ func loadPage(title string) (*Page, error) {
 var validPath = regexp.MustCompile("^/pages/([a-zA-Z0-9]+)$")
 
 func renderJSON(w http.ResponseWriter, tmpl string, p *Page) {
-        data, _ := json.Marshal(p)
-        w.Header().Set("Content-Type", "application/json; charset=utf-8")
-        w.Write(data)
+	data, _ := json.Marshal(p)
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	w.Write(data)
 }
 
 func makeHandler(fn func(http.ResponseWriter, *http.Request, string)) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		m := validPath.FindStringSubmatch(r.URL.Path)
-                if m == nil {
-                      http.NotFound(w, r)
-                      return
-                }
-                fn(w, r, m[2])
+		if m == nil {
+			http.NotFound(w, r)
+			return
+		}
+		fn(w, r, m[2])
 	}
 }
-func viewHandler(w http.ResponseWriter, r *http.Request, title string) {
+func ViewHandler(w http.ResponseWriter, r *http.Request, title string) {
 	p, err := loadPage(title)
 	if err != nil {
 		http.Redirect(w, r, "/edit/"+title, http.StatusFound)
@@ -80,7 +56,7 @@ func editHandler(w http.ResponseWriter, r *http.Request, title string) {
 func saveHandler(w http.ResponseWriter, r *http.Request, title string) {
 	body := r.FormValue("body")
 	p := &Page{Title: title, Body: []byte(body)}
-	err := p.save()
+	err := p.Save()
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -89,7 +65,7 @@ func saveHandler(w http.ResponseWriter, r *http.Request, title string) {
 }
 
 func main() {
-	http.HandleFunc("/pages/", makeHandler(viewHandler))
+	http.HandleFunc("/pages/", makeHandler(ViewHandler))
 	http.HandleFunc("/edit/", makeHandler(editHandler))
 	http.HandleFunc("/save/", makeHandler(saveHandler))
 	http.ListenAndServe(":8080", nil)
