@@ -14,6 +14,17 @@ type Page struct {
 	Body  []byte `json:"body,omitempty"`
 }
 
+type PageJSON struct {
+        Title string `json:"title"`
+        Body  string  `json:"body,omitempty"`
+}
+
+func (p *Page) MarshalJSON() ([]byte, error) {
+  pj := &PageJSON{Title: p.Title, Body: string(p.Body[:])}
+  data, error := json.Marshal(pj)
+  return data, error
+}
+
 // Add a save method to our Page struct so we can persist our data
 // This method's signature reads: "This is a method named save that takes as its receiver p, a pointer to Page . It takes no parameters, and returns a value of type error."
 func (p *Page) save() error {

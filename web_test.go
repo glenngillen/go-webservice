@@ -7,12 +7,12 @@ import (
   )
 
 func init() {
-  p := &Page{Title: "foo" }
+  p := &Page{Title: "foo", Body: []byte("Example body") }
   p.save()
 }
 
 func TestHandleGetReturnsPage(t *testing.T) {
-  b := "{\"title\":\"foo\"}"
+  b := "{\"title\":\"foo\",\"body\":\"Example body\"}"
   request, _ := http.NewRequest("GET", "/pages/foo", nil)
   response := httptest.NewRecorder()
 
