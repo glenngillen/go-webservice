@@ -26,7 +26,6 @@ var _ = Describe("Web", func() {
 				ViewHandler(response, request, "foo")
                                 expectedJSON := `{"title":"foo","body":"Example body"}`
 				Expect(response.Body.String()).To(Equal(expectedJSON))
-				/* Expect("b").To(Equal("a")) */
 			})
 		})
 	})
