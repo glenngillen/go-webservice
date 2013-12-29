@@ -20,7 +20,7 @@ var _ = Describe("Web", func() {
 
 	Describe("Fetching a page", func() {
 		Context("by ID", func() {
-			It("it has a JSON representation", func() {
+			It("has a JSON representation", func() {
 				request, _ := http.NewRequest("GET", "/pages/foo", nil)
 				response := httptest.NewRecorder()
 				ViewHandler(response, request, "foo")
@@ -36,4 +36,14 @@ var _ = Describe("Web", func() {
                         })
 		})
 	})
+
+        Describe("Fetching all pages", func() {
+                It("returns a JSON array", func() {
+			request, _ := http.NewRequest("GET", "/pages", nil)
+			response := httptest.NewRecorder()
+			IndexHandler(response, request)
+                        expectedJSON := `[{"title":"foo","body":"Example body"}]`
+			Expect(response.Body.String()).To(Equal(expectedJSON))
+                })
+        })
 })

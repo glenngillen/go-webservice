@@ -5,10 +5,24 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
+        "path/filepath"
 	"regexp"
 )
 
 // Load pages too
+func loadPages() (pages []*Page, err error) {
+        err = nil
+        files, _ := filepath.Glob("/Users/glenngillen/Development/go-webservice/*.txt")
+        re := regexp.MustCompile("([^/]+).txt$")
+        title := re.FindStringSubmatch(files[0])[1]
+        page, err := loadPage(title)
+	if err != nil {
+		return nil, err
+	}
+        pages = append(pages, page)
+	return pages, nil
+}
+
 func loadPage(title string) (*Page, error) {
 	filename := title + ".txt"
 	body, err := ioutil.ReadFile(filename)
@@ -36,6 +50,18 @@ func makeHandler(fn func(http.ResponseWriter, *http.Request, string)) http.Handl
 		fn(w, r, m[2])
 	}
 }
+
+func IndexHandler(w http.ResponseWriter, r *http.Request) {
+	pages, err := loadPages()
+	if err != nil {
+                http.NotFound(w, r)
+		return
+	}
+	data, _ := json.Marshal(pages)
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	w.Write(data)
+}
+
 func ViewHandler(w http.ResponseWriter, r *http.Request, title string) {
 	p, err := loadPage(title)
 	if err != nil {
@@ -65,6 +91,7 @@ func saveHandler(w http.ResponseWriter, r *http.Request, title string) {
 }
 
 func main() {
+	http.HandleFunc("/pages", IndexHandler)
 	http.HandleFunc("/pages/", makeHandler(ViewHandler))
 	http.HandleFunc("/edit/", makeHandler(editHandler))
 	http.HandleFunc("/save/", makeHandler(saveHandler))
