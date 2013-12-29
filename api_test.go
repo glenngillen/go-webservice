@@ -18,9 +18,9 @@ var _ = Describe("Web", func() {
                 page.Save()
 	})
 
-	Describe("Categorizing book length", func() {
-		Context("With more than 300 pages", func() {
-			It("should be a novel", func() {
+	Describe("Fetching a page", func() {
+		Context("by ID", func() {
+			It("it has a JSON representation", func() {
 				request, _ := http.NewRequest("GET", "/pages/foo", nil)
 				response := httptest.NewRecorder()
 				ViewHandler(response, request, "foo")
