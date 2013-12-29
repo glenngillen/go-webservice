@@ -27,6 +27,13 @@ var _ = Describe("Web", func() {
                                 expectedJSON := `{"title":"foo","body":"Example body"}`
 				Expect(response.Body.String()).To(Equal(expectedJSON))
 			})
+
+                        It("returns a 404 if doesn't exist", func() {
+				request, _ := http.NewRequest("GET", "/pages/bar", nil)
+				response := httptest.NewRecorder()
+				ViewHandler(response, request, "bar")
+				Expect(response.Code).To(Equal(404))
+                        })
 		})
 	})
 })

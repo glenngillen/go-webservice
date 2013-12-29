@@ -39,7 +39,7 @@ func makeHandler(fn func(http.ResponseWriter, *http.Request, string)) http.Handl
 func ViewHandler(w http.ResponseWriter, r *http.Request, title string) {
 	p, err := loadPage(title)
 	if err != nil {
-		http.Redirect(w, r, "/edit/"+title, http.StatusFound)
+                http.NotFound(w, r)
 		return
 	}
 	renderJSON(w, "view", p)
