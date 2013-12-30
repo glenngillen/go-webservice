@@ -55,6 +55,8 @@ func IndexHandler(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case "POST":
                 SaveHandler(w, r)
+        case "PUT":
+                UpdateHandler(w, r)
 	case "GET":
 		pages, err := loadPages()
 		if err != nil {
@@ -85,6 +87,19 @@ func editHandler(w http.ResponseWriter, r *http.Request, title string) {
 	renderJSON(w, "edit", p)
 }
 
+func UpdateHandler(w http.ResponseWriter, r *http.Request) {
+        var page Page
+        jsonBody := make([]byte, r.ContentLength)
+        _, err := r.Body.Read(jsonBody)
+        json.Unmarshal(jsonBody, &page)
+        err1 := page.Save()
+	if err1 != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+        w.WriteHeader(http.StatusNoContent)
+}
+
 func SaveHandler(w http.ResponseWriter, r *http.Request) {
         var page Page
         jsonBody := make([]byte, r.ContentLength)
@@ -100,8 +115,6 @@ func SaveHandler(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	http.HandleFunc("/pages", IndexHandler)
-	http.HandleFunc("/pages/", makeHandler(ViewHandler))
-	http.HandleFunc("/edit/", makeHandler(editHandler))
 	http.HandleFunc("/save/", SaveHandler)
 	http.ListenAndServe(":8080", nil)
 }

@@ -66,4 +66,14 @@ var _ = Describe("Web", func() {
                         Expect(response.Code).To(Equal(303))
 		})
 	})
+
+	Describe("Updating a page", func() {
+		It("is updated from JSON", func() {
+			jsonObject := `{"title":"foo","body":"My new page body"}`
+			request, _ := http.NewRequest("PUT", "/pages/foo", strings.NewReader(jsonObject))
+			response := httptest.NewRecorder()
+			UpdateHandler(response, request)
+                        Expect(response.Code).To(Equal(204))
+		})
+	})
 })
