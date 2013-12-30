@@ -4,12 +4,23 @@ import (
 	. "../go-webservice"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+
+        "io/ioutil"
 	"net/http"
 	"net/http/httptest"
         "os"
         "path/filepath"
         "strings"
 )
+
+func loadPage(title string) (*Page, error) {
+	filename := title + ".txt"
+	body, err := ioutil.ReadFile(filename)
+	if err != nil {
+		return nil, err
+	}
+	return &Page{Title: title, Body: body}, nil
+}
 
 var _ = Describe("Web", func() {
 	var (
@@ -63,7 +74,9 @@ var _ = Describe("Web", func() {
 			request, _ := http.NewRequest("POST", "/pages", strings.NewReader(jsonObject))
 			response := httptest.NewRecorder()
 			SaveHandler(response, request)
+                        page, _:= loadPage("bar")
                         Expect(response.Code).To(Equal(303))
+                        Expect(string(page.Body[:])).To(Equal("New page body"))
 		})
 	})
 
@@ -73,7 +86,9 @@ var _ = Describe("Web", func() {
 			request, _ := http.NewRequest("PUT", "/pages/foo", strings.NewReader(jsonObject))
 			response := httptest.NewRecorder()
 			UpdateHandler(response, request)
+                        page, _:= loadPage("foo")
                         Expect(response.Code).To(Equal(204))
+                        Expect(string(page.Body[:])).To(Equal("My new page body"))
 		})
 	})
 })

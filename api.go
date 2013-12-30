@@ -88,11 +88,13 @@ func editHandler(w http.ResponseWriter, r *http.Request, title string) {
 }
 
 func UpdateHandler(w http.ResponseWriter, r *http.Request) {
-        var page Page
+        var pageJson PageJSON
         jsonBody := make([]byte, r.ContentLength)
         _, err := r.Body.Read(jsonBody)
-        json.Unmarshal(jsonBody, &page)
-        err1 := page.Save()
+        json.Unmarshal(jsonBody, &pageJson)
+        existingPage, _ := loadPage(pageJson.Title)
+        existingPage.Body = []byte(pageJson.Body)
+        err1 := existingPage.Save()
 	if err1 != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -101,10 +103,11 @@ func UpdateHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func SaveHandler(w http.ResponseWriter, r *http.Request) {
-        var page Page
+        var pageJson PageJSON
         jsonBody := make([]byte, r.ContentLength)
         _, err := r.Body.Read(jsonBody)
-        json.Unmarshal(jsonBody, &page)
+        json.Unmarshal(jsonBody, &pageJson)
+        page := &Page{Title: pageJson.Title, Body: []byte(pageJson.Body)}
         err1 := page.Save()
 	if err1 != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
